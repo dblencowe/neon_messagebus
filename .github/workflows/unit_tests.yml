@@ -1,0 +1,43 @@
+# This workflow will run unit tests
+
+name: Run Unit Tests
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  unit_tests:
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          sudo apt install portaudio19-dev python3-pyaudio
+          python -m pip install --upgrade pip
+          pip install -r requirements/requirements.txt
+          pip install -r requirements/test_requirements.txt
+
+      - name: Test Signal Utilities
+        run: |
+          pytest tests/test_signal_utils.py --doctest-modules --junitxml=tests/signal-util-test-results.xml
+      - name: Upload Signal Util test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: signal-util-test-results
+          path: tests/signal-util-test-results.xml
+
+      - name: Test Message Utilities
+        run: |
+          pytest tests/test_message_utils.py --doctest-modules --junitxml=tests/message-util-test-results.xml
+      - name: Upload Message Util test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: message-util-test-results
+          path: tests/message-util-test-results.xml
