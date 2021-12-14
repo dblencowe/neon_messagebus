@@ -26,10 +26,12 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from mycroft.lock import Lock  # creates/supports PID locking file
-from mycroft.util import wait_for_exit_signal, reset_sigint_handler
+from neon_utils.logger import LOG
 from neon_messagebus.service import NeonBusService
 from neon_messagebus.util.signal_utils import SignalManager
+
+from mycroft.lock import Lock  # creates/supports PID locking file
+from mycroft.util import wait_for_exit_signal, reset_sigint_handler
 
 
 def main():
@@ -40,8 +42,10 @@ def main():
     service = NeonBusService(debug=True, daemonic=True)
     service.start()
     SignalManager()
+    LOG.debug("Signal Manager Initialized")
     wait_for_exit_signal()
     service.shutdown()
+    lock.delete()
 
 
 if __name__ == "__main__":

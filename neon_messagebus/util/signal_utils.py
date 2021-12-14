@@ -31,9 +31,10 @@ from time import time
 from typing import Optional, Dict
 from mycroft_bus_client import MessageBusClient, Message
 from neon_utils.logger import LOG
+from neon_utils.configuration_utils import get_neon_local_config
+from ovos_utils.signal import create_signal, check_for_signal
 
-BUS = MessageBusClient()
-BUS.run_in_thread()
+_SIGNAL_CONFIG = {"ipc_path": get_neon_local_config()['dirVars']['ipcDir']}
 
 
 class Signal:
@@ -85,9 +86,10 @@ class Signal:
 
 
 class SignalManager:
-    def __init__(self, bus: MessageBusClient = None):
+    def __init__(self, bus: MessageBusClient = None, handle_files: bool = True):
         self._signals: Dict[str, Signal] = dict()
         self.bus = bus or MessageBusClient()
+        self._handle_files = handle_files
         self._register_listeners()
         self.bus.run_in_thread()
         if not self.bus.connected_event.wait(60):
@@ -99,6 +101,8 @@ class SignalManager:
         """
         self._ensure_signal_is_defined(signal)
         self._signals[signal].create()
+        if self._handle_files:
+            create_signal(signal, config=_SIGNAL_CONFIG)
         return True
 
     def check_for_signal(self, signal: str, sec_lifetime: int = 0):
@@ -111,6 +115,8 @@ class SignalManager:
         if sec_lifetime == 0:
             # Clear the signal and return
             self._signals[signal].clear()
+            if self._handle_files:
+                check_for_signal(signal, config=_SIGNAL_CONFIG)
             return True
         if sec_lifetime == -1:
             # Return signal state (True)
@@ -119,6 +125,8 @@ class SignalManager:
             # Signal is expired and must be cleared
             LOG.debug(f"Clearing expired signal: {signal}")
             self._signals[signal].clear()
+            if self._handle_files:
+                check_for_signal(signal, config=_SIGNAL_CONFIG)
             return False
         # Signal exists and is not yet expired
         return True

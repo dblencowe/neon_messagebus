@@ -72,7 +72,7 @@ setup(
     long_description_content_type="text/markdown",
     entry_points={
         'console_scripts': [
-            'neon_messagebus_service=neon_speech.__main__:main'
+            'neon_messagebus_service=neon_messagebus.service.__main__:main'
         ]
     }
 )
