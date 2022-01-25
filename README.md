@@ -19,10 +19,7 @@ to start the container.
 docker run -d \
 --network=host \
 --name=neon_messagebus \
--v ${NEON_DATA_DIR}:/home/neon/.local/share/neon:rw \
--v ${NEON_CONFIG_DIR}:/home/neon/.config/neon:rw \
+-v ${NEON_CONFIG_DIR}:/config \
 neon_messagebus
 ```
-
->*Note:* The above example assumes Docker data locations are specified in the `NEON_DATA_DIR` and `NEON_CONFIG_DIR`
-> environment variables.
+>*Note:* The above example assumes `NEON_CONFIG_DIR` contains valid configuration
