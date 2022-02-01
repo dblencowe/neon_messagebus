@@ -29,18 +29,21 @@
 from neon_utils.logger import LOG
 from neon_messagebus.service import NeonBusService
 from neon_messagebus.util.signal_utils import SignalManager
+from neon_utils.configuration_utils import init_config_dir
 
 from mycroft.lock import Lock  # creates/supports PID locking file
 from mycroft.util import wait_for_exit_signal, reset_sigint_handler
 
 
 def main():
+    init_config_dir()
     reset_sigint_handler()
     # Create PID file, prevent multiple instances of this service
     lock = Lock("bus")
     # TODO debug should be False by default
     service = NeonBusService(debug=True, daemonic=True)
     service.start()
+    service.started.wait(10)
     SignalManager()
     LOG.debug("Signal Manager Initialized")
     wait_for_exit_signal()

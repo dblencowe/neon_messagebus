@@ -34,8 +34,6 @@ from neon_utils.logger import LOG
 from neon_utils.configuration_utils import get_neon_local_config
 from ovos_utils.signal import create_signal, check_for_signal
 
-_SIGNAL_CONFIG = {"ipc_path": get_neon_local_config()['dirVars']['ipcDir']}
-
 
 class Signal:
     def __init__(self):
@@ -87,6 +85,7 @@ class Signal:
 
 class SignalManager:
     def __init__(self, bus: MessageBusClient = None, handle_files: bool = True):
+        self._signal_config = {"ipc_path": get_neon_local_config()['dirVars']['ipcDir']}
         self._signals: Dict[str, Signal] = dict()
         self.bus = bus or MessageBusClient()
         self._handle_files = handle_files
@@ -102,7 +101,7 @@ class SignalManager:
         self._ensure_signal_is_defined(signal)
         self._signals[signal].create()
         if self._handle_files:
-            create_signal(signal, config=_SIGNAL_CONFIG)
+            create_signal(signal, config=self._signal_config)
         return True
 
     def check_for_signal(self, signal: str, sec_lifetime: int = 0):
@@ -116,7 +115,7 @@ class SignalManager:
             # Clear the signal and return
             self._signals[signal].clear()
             if self._handle_files:
-                check_for_signal(signal, config=_SIGNAL_CONFIG)
+                check_for_signal(signal, config=self._signal_config)
             return True
         if sec_lifetime == -1:
             # Return signal state (True)
@@ -126,7 +125,7 @@ class SignalManager:
             LOG.debug(f"Clearing expired signal: {signal}")
             self._signals[signal].clear()
             if self._handle_files:
-                check_for_signal(signal, config=_SIGNAL_CONFIG)
+                check_for_signal(signal, config=self._signal_config)
             return False
         # Signal exists and is not yet expired
         return True
