@@ -26,32 +26,59 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import os
+import sys
+import unittest
+
+from os.path import join, dirname, abspath
+from time import time, sleep
+from threading import Event, Thread
+
+from mycroft_bus_client import MessageBusClient, Message
 from neon_utils.logger import LOG
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from neon_messagebus.service import NeonBusService
-from neon_messagebus.util.signal_utils import SignalManager
-from neon_utils.configuration_utils import init_config_dir
-
-from mycroft.lock import Lock  # creates/supports PID locking file
-from mycroft.util import wait_for_exit_signal, reset_sigint_handler
 
 
-def main():
-    init_config_dir()
-    reset_sigint_handler()
-    # Create PID file, prevent multiple instances of this service
-    lock = Lock("bus")
-    # TODO debug should be False by default
-    service = NeonBusService(debug=True, daemonic=True)
-    service.start()
-    if not service.started.wait(10):
-        LOG.warning("Timeout waiting for service start")
-    SignalManager()
-    LOG.debug("Signal Manager Initialized")
-    wait_for_exit_signal()
-    service.shutdown()
-    lock.delete()
-    LOG.info("Messagebus service stopped")
+class TestMessagebusService(unittest.TestCase):
+    def test_bus_service(self):
+        called_count = 0
+        callback_message = Message("test_message", {"data": "test"})
+
+        def _callback_method(message):
+            nonlocal called_count
+            called_count += 1
+            self.assertEqual(message, callback_message)
+
+        clients = list()
+        service = NeonBusService(debug=True, daemonic=True)
+        service.start()
+        LOG.info("Waiting for service start")
+        self.assertTrue(service.started.wait(15))
+        LOG.info("Service started")
+        for i in range(32):
+            client = MessageBusClient()
+            client.run_in_thread()
+            clients.append(client)
+        for client in clients:
+            self.assertTrue(client.started_running)
+            self.assertTrue(client.connected_event.wait(10))
+            client.on("test_message", _callback_method)
+        sender = MessageBusClient()
+        sender.run_in_thread()
+        sender.emit(callback_message)
+
+        timeout = time() + 10
+        while called_count < len(clients) and time() < timeout:
+            sleep(1)
+
+        self.assertEqual(len(clients), called_count)
+
+        self.assertTrue(service.started.is_set())
+        service.shutdown()
+        self.assertFalse(service.started.is_set())
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    unittest.main()

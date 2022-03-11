@@ -26,32 +26,41 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from collections import namedtuple
+from ovos_utils.configuration import read_mycroft_config
+
 from neon_utils.logger import LOG
-from neon_messagebus.service import NeonBusService
-from neon_messagebus.util.signal_utils import SignalManager
-from neon_utils.configuration_utils import init_config_dir
 
-from mycroft.lock import Lock  # creates/supports PID locking file
-from mycroft.util import wait_for_exit_signal, reset_sigint_handler
+MessageBusConfig = namedtuple(
+    'MessageBusConfig',
+    ['host', 'port', 'route', 'ssl']
+)
 
-
-def main():
-    init_config_dir()
-    reset_sigint_handler()
-    # Create PID file, prevent multiple instances of this service
-    lock = Lock("bus")
-    # TODO debug should be False by default
-    service = NeonBusService(debug=True, daemonic=True)
-    service.start()
-    if not service.started.wait(10):
-        LOG.warning("Timeout waiting for service start")
-    SignalManager()
-    LOG.debug("Signal Manager Initialized")
-    wait_for_exit_signal()
-    service.shutdown()
-    lock.delete()
-    LOG.info("Messagebus service stopped")
+_DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
+                      "port": 8181,
+                      "route": "/core",
+                      "ssl": False}
 
 
-if __name__ == "__main__":
-    main()
+def load_message_bus_config(**kwargs) -> MessageBusConfig:
+    """
+    Mycroft-compatible method to read websocket configuration from disk
+    :returns: MessageBusConfig object built from global configuration
+    """
+    LOG.info('Loading message bus configs')
+    config = read_mycroft_config()
+
+    websocket_config = config.get('websocket') or _DEFAULT_WS_CONFIG
+
+    ws_config = MessageBusConfig(
+        host=kwargs.get('host') or websocket_config.get('host'),
+        port=kwargs.get('port') or websocket_config.get('port'),
+        route=kwargs.get('route') or websocket_config.get('route'),
+        ssl=kwargs.get('ssl') or False if 'ssl' in kwargs else
+        websocket_config.get('ssl') or False
+    )
+    if not all([ws_config.host, ws_config.port, ws_config.route]):
+        error_msg = 'Missing one or more websocket configs'
+        raise ValueError(error_msg)
+
+    return ws_config

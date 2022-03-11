@@ -35,7 +35,8 @@ from threading import Thread, Event
 from tornado import web, ioloop
 from neon_utils import LOG
 
-from mycroft.messagebus.load_config import load_message_bus_config
+from neon_messagebus.util.config import load_message_bus_config
+
 from mycroft.messagebus.service.event_handler import MessageBusEventHandler
 
 
@@ -59,7 +60,8 @@ class NeonBusService(Thread):
         ioloop.IOLoop.instance().start()
         self._started.set()
 
-    def _init_tornado(self):
+    @staticmethod
+    def _init_tornado():
         # Disable all tornado logging so mycroft loglevel isn't overridden
         tornado.options.parse_command_line(sys.argv + ['--logging=None'])
         # get event loop for this thread
@@ -69,6 +71,7 @@ class NeonBusService(Thread):
         routes = [(self.config.route, MessageBusEventHandler)]
         application = web.Application(routes, debug=self.debug)
         ssl_options = None
+        LOG.info(f"Starting Messagebus server with config: {self.config}")
         if self.config.ssl:
             cert = expanduser(self.config.ssl_cert)
             key = expanduser(self.config.ssl_key)
@@ -88,5 +91,6 @@ class NeonBusService(Thread):
             application.listen(self.config.port, self.config.host)
 
     def shutdown(self):
+        LOG.info("Messagebus Server shutting down.")
         self._started.clear()
         # TODO

@@ -29,9 +29,10 @@
 import os
 import sys
 import unittest
+
 from os.path import join, dirname, abspath
-from time import time
-from threading import Event
+from time import time, sleep
+from threading import Event, Thread
 
 from mycroft_bus_client import MessageBusClient, Message
 
@@ -165,6 +166,133 @@ class TestMessageUtils(unittest.TestCase):
         self.assertEqual(decode_binary_message(hex_data), byte_data)
         self.assertEqual(decode_binary_message(message), byte_data)
         self.assertEqual(decode_binary_message(serialized_message), byte_data)
+
+
+class TestSignalUtils(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        from neon_messagebus.util.signal_utils import SignalManager
+        cls.service = NeonBusService(debug=True, daemonic=True)
+        cls.service.start()
+        cls.service.started.wait()
+        cls.signal_manager = SignalManager()
+        from neon_utils.signal_utils import init_signal_handlers
+        init_signal_handlers()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.service.shutdown()
+
+    def test_create_signal(self):
+        from neon_messagebus.util.signal_utils import Signal
+        from neon_utils.signal_utils import create_signal
+        self.assertTrue(create_signal("test_signal"))
+        self.assertTrue(create_signal("test_signal"))
+        self.assertIsInstance(self.signal_manager._signals["test_signal"], Signal)
+        self.assertTrue(self.signal_manager._signals["test_signal"].is_set)
+
+    def test_check_for_signal(self):
+        from neon_utils.signal_utils import check_for_signal, create_signal
+        self.assertFalse(check_for_signal("test_signal"))
+        create_signal("test_signal")
+        self.assertTrue(check_for_signal("test_signal", -1))
+        self.assertTrue(check_for_signal("test_signal", 60))
+        self.assertTrue(check_for_signal("test_signal"))
+        self.assertFalse(check_for_signal("test_signal"))
+        create_signal("test_signal")
+        self.assertTrue(check_for_signal("test_signal", 15))
+        sleep(2)
+        self.assertTrue(check_for_signal("test_signal", 15))
+        self.assertFalse(check_for_signal("test_signal", 1))
+        self.assertFalse(check_for_signal("test_signal"))
+
+    def test_wait_for_signal_create(self):
+        from neon_utils.signal_utils import check_for_signal, create_signal, wait_for_signal_create
+
+        def create_testing_signal():
+            sleep(3)
+            create_signal("test_signal")
+        check_for_signal("test_signal")
+        self.assertFalse(wait_for_signal_create("test_signal", 1))
+        Thread(target=create_testing_signal).start()
+        self.assertTrue(wait_for_signal_create("test_signal", 5))
+        self.assertTrue(check_for_signal("test_signal"))
+
+    def test_wait_for_signal_clear(self):
+        from neon_utils.signal_utils import check_for_signal, create_signal, wait_for_signal_clear
+
+        def _clear_signal():
+            sleep(3)
+            self.assertTrue(check_for_signal("test_signal"))
+        check_for_signal("test_signal")
+        self.assertFalse(wait_for_signal_clear("test_signal", 1))
+        self.assertTrue(create_signal("test_signal"))
+        self.assertTrue(wait_for_signal_clear("test_signal", 1))
+        Thread(target=_clear_signal).start()
+        self.assertFalse(wait_for_signal_clear("test_signal", 10))
+        self.assertFalse(check_for_signal("test_signal"))
+
+    def test_threaded_signal_handling(self):
+        from neon_utils.signal_utils import check_for_signal, create_signal
+        create_results = []
+        check_results = []
+
+        def _create_signal(n):
+            stat = create_signal(f"test_signal{n}")
+            create_results.append(stat)
+
+        def _check_signal(n):
+            sleep(1)
+            stat = check_for_signal(f"test_signal{n}", -1)
+            check_results.append(stat)
+
+        threads = []
+        for i in range(8):
+            t = Thread(target=_create_signal, args=(i,))
+            threads.append(t)
+            t.start()
+            t = Thread(target=_check_signal, args=(i,))
+            t.start()
+            threads.append(t)
+
+        for t in threads:
+            t.join()
+
+        self.assertTrue(all(create_results))
+        self.assertTrue(all(check_results))
+        self.assertEqual(8, len(create_results), len(check_results))
+
+
+class TestConfig(unittest.TestCase):
+    def test_load_messagebus_config_default(self):
+        from neon_messagebus.util.config import load_message_bus_config,\
+            _DEFAULT_WS_CONFIG
+        empty_config = {"host": None,
+                        "port": None,
+                        "route": None,
+                        "ssl": None}
+        self.assertEqual(load_message_bus_config(**empty_config),
+                         load_message_bus_config(**_DEFAULT_WS_CONFIG))
+
+    def test_load_messagebus_config_configured(self):
+        from neon_messagebus.util.config import load_message_bus_config, \
+            MessageBusConfig
+        test_config_dir = os.path.join(os.path.dirname(__file__),
+                                       "test_config")
+        os.environ["XDG_CONFIG_HOME"] = test_config_dir
+        config = load_message_bus_config()
+        self.assertEqual(config, MessageBusConfig(host="test_hostname",
+                                                  port=80,
+                                                  route="/test",
+                                                  ssl=True))
+
+        override_config = load_message_bus_config(port=8000, ssl=False)
+        self.assertEqual(override_config,
+                         MessageBusConfig(host="test_hostname",
+                                          port=8000,
+                                          route="/test",
+                                          ssl=False))
+        os.environ.pop("XDG_CONFIG_HOME")
 
 
 if __name__ == '__main__':
