@@ -84,13 +84,16 @@ class Signal:
 
 
 class SignalManager:
-    def __init__(self, bus: MessageBusClient = None, handle_files: bool = True):
-        self._signal_config = {"ipc_path": get_neon_local_config()['dirVars']['ipcDir']}
+    def __init__(self, bus: MessageBusClient = None,
+                 handle_files: bool = True):
+        self._signal_config = {
+            "ipc_path": get_neon_local_config()['dirVars']['ipcDir']}
         self._signals: Dict[str, Signal] = dict()
         self.bus = bus or MessageBusClient()
         self._handle_files = handle_files
         self._register_listeners()
-        self.bus.run_in_thread()
+        if not self.bus.started_running:
+            self.bus.run_in_thread()
         if not self.bus.connected_event.wait(60):
             LOG.error(f"Bus not connected after 60 seconds")
 
@@ -99,9 +102,9 @@ class SignalManager:
         Set the specified signal, creating it if it doesn't exist
         """
         self._ensure_signal_is_defined(signal)
-        self._signals[signal].create()
         if self._handle_files:
             create_signal(signal, config=self._signal_config)
+        self._signals[signal].create()
         return True
 
     def check_for_signal(self, signal: str, sec_lifetime: int = 0):
@@ -113,9 +116,9 @@ class SignalManager:
             return False
         if sec_lifetime == 0:
             # Clear the signal and return
-            self._signals[signal].clear()
             if self._handle_files:
                 check_for_signal(signal, config=self._signal_config)
+            self._signals[signal].clear()
             return True
         if sec_lifetime == -1:
             # Return signal state (True)
@@ -123,29 +126,32 @@ class SignalManager:
         if self._signals[signal].create_time + sec_lifetime < time():
             # Signal is expired and must be cleared
             LOG.debug(f"Clearing expired signal: {signal}")
-            self._signals[signal].clear()
             if self._handle_files:
                 check_for_signal(signal, config=self._signal_config)
+            self._signals[signal].clear()
             return False
         # Signal exists and is not yet expired
         return True
 
-    def wait_for_signal_set(self, signal: str, sec_timeout: Optional[int] = None) -> bool:
+    def wait_for_signal_set(self, signal: str,
+                            sec_timeout: Optional[int] = None) -> bool:
         """
-        Wait for the specified signal to be set and return set state after timeout
+        Wait for the specified signal to be set and return set state at timeout
         """
         self._ensure_signal_is_defined(signal)
         return self._signals[signal].wait_for_create(sec_timeout)
 
-    def wait_for_signal_clear(self, signal: str, sec_timeout: Optional[int] = None) -> bool:
+    def wait_for_signal_clear(self, signal: str,
+                              sec_timeout: Optional[int] = None) -> bool:
         """
-        Wait for the specified signal to be set and return set state after timeout
+        Wait for the specified signal to be set and return set state at timeout
         """
         self._ensure_signal_is_defined(signal)
         return self._signals[signal].wait_for_clear(sec_timeout)
 
     def _ensure_signal_is_defined(self, signal):
-        if signal not in self._signals or not isinstance(self._signals[signal], Signal):
+        if signal not in self._signals or not isinstance(self._signals[signal],
+                                                         Signal):
             self._signals[signal] = Signal()
 
     def _register_listeners(self):
@@ -154,9 +160,12 @@ class SignalManager:
         """
         self.bus.on("neon.create_signal", self._handle_create_signal)
         self.bus.on("neon.check_for_signal", self._handle_check_for_signal)
-        self.bus.on("neon.wait_for_signal_create", self._handle_wait_for_signal_create)
-        self.bus.on("neon.wait_for_signal_clear", self._handle_wait_for_signal_clear)
-        self.bus.on("neon.signal_manager_active", self._handle_signal_manager_active)
+        self.bus.on("neon.wait_for_signal_create",
+                    self._handle_wait_for_signal_create)
+        self.bus.on("neon.wait_for_signal_clear",
+                    self._handle_wait_for_signal_clear)
+        self.bus.on("neon.signal_manager_active",
+                    self._handle_signal_manager_active)
 
     def _handle_create_signal(self, message: Message):
         signal_name = message.data["signal_name"]
@@ -167,25 +176,30 @@ class SignalManager:
 
     def _handle_check_for_signal(self, message: Message):
         signal_name = message.data["signal_name"]
-        status = self.check_for_signal(signal_name, message.data.get("sec_lifetime", 0))
+        status = self.check_for_signal(signal_name,
+                                       message.data.get("sec_lifetime", 0))
         self.bus.emit(message.reply(f"neon.check_for_signal.{signal_name}",
                                     data={"signal_name": signal_name,
                                           "is_set": status}))
 
     def _handle_wait_for_signal_create(self, message: Message):
         signal_name = message.data["signal_name"]
-        status = self.wait_for_signal_set(signal_name, message.data.get("timeout"))
-        self.bus.emit(message.reply(f"neon.wait_for_signal_create.{signal_name}",
-                                    data={"signal_name": signal_name,
-                                          "is_set": status}))
+        status = self.wait_for_signal_set(signal_name,
+                                          message.data.get("timeout"))
+        self.bus.emit(message.reply(
+            f"neon.wait_for_signal_create.{signal_name}",
+            data={"signal_name": signal_name,
+                  "is_set": status}))
 
     def _handle_wait_for_signal_clear(self, message: Message):
         signal_name = message.data["signal_name"]
-        status = self.wait_for_signal_clear(signal_name, message.data.get("timeout"))
+        status = self.wait_for_signal_clear(signal_name,
+                                            message.data.get("timeout"))
         LOG.debug(f"Wait returning {status}")
-        self.bus.emit(message.reply(f"neon.wait_for_signal_clear.{signal_name}",
-                                    data={"signal_name": signal_name,
-                                          "is_set": status}))
+        self.bus.emit(message.reply(
+            f"neon.wait_for_signal_clear.{signal_name}",
+            data={"signal_name": signal_name,
+                  "is_set": status}))
 
     def _handle_signal_manager_active(self, message: Message):
         self.bus.emit(message.response())

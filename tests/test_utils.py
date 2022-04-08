@@ -176,12 +176,18 @@ class TestSignalUtils(unittest.TestCase):
         cls.service.start()
         cls.service.started.wait()
         cls.signal_manager = SignalManager()
-        from neon_utils.signal_utils import init_signal_handlers
-        init_signal_handlers()
 
     @classmethod
     def tearDownClass(cls) -> None:
         cls.service.shutdown()
+
+    def test_00_init_signal_handlers(self):
+        from neon_utils.signal_utils import init_signal_handlers
+        init_signal_handlers()
+        from neon_utils.signal_utils import _manager_create_signal, _create_signal
+        self.assertEqual(_manager_create_signal, _create_signal)
+        from neon_utils.signal_utils import _manager_check_for_signal, _check_for_signal
+        self.assertEqual(_manager_check_for_signal, _check_for_signal)
 
     def test_create_signal(self):
         from neon_messagebus.util.signal_utils import Signal
