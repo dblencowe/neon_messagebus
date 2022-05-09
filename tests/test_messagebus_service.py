@@ -30,10 +30,7 @@ import os
 import sys
 import unittest
 
-from os.path import join, dirname, abspath
 from time import time, sleep
-from threading import Event, Thread
-
 from mycroft_bus_client import MessageBusClient, Message
 from neon_utils.logger import LOG
 
