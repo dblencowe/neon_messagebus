@@ -105,9 +105,11 @@ class NeonBusService(Thread):
         self._app.stop()
         loop = ioloop.IOLoop.instance()
         loop.add_callback(loop.stop)
+        sleep(1)
         loop.close()
         self._loop.call_soon_threadsafe(self._loop.stop)
         while self._loop.is_running():
             LOG.debug("Waiting for loop to stop...")
             sleep(1)
         self._loop.close()
+        LOG.info("Messagebus service stopped")
