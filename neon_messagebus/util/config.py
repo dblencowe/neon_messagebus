@@ -27,9 +27,9 @@
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from collections import namedtuple
-from ovos_utils.configuration import read_mycroft_config
-
 from neon_utils.logger import LOG
+
+from ovos_config.config import Configuration
 
 MessageBusConfig = namedtuple(
     'MessageBusConfig',
@@ -48,7 +48,7 @@ def load_message_bus_config(**kwargs) -> MessageBusConfig:
     :returns: MessageBusConfig object built from global configuration
     """
     LOG.info('Loading message bus configs')
-    config = read_mycroft_config()
+    config = Configuration()
 
     websocket_config = config.get('websocket') or _DEFAULT_WS_CONFIG
 

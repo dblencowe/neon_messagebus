@@ -26,7 +26,8 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from neon_utils.configuration_utils import get_neon_local_config
+from ovos_config.config import Configuration
+from neon_utils.logger import LOG
 
 
 def start_mq_connector(bus_config: dict):
@@ -34,12 +35,16 @@ def start_mq_connector(bus_config: dict):
     Start the MQ Connector module to handle MQ API requests
     """
     from neon_messagebus_mq_connector import ChatAPIProxy
-    mq_creds = get_neon_local_config()["MQ"]
-    if "neon_chat_api" not in mq_creds.get("users", {}):
+    config = Configuration()
+    mq_config = dict(config).get("MQ")
+    bus_config = bus_config or dict(config).get("websocket")
+
+    if "neon_chat_api" not in mq_config.get("users", {}):
+        LOG.info("Skipping MQ Connector init")
         return None
     bus_config = bus_config
     chat_connector = ChatAPIProxy(service_name="neon_chat_api",
-                                  config={"MQ": mq_creds,
+                                  config={"MQ": mq_config,
                                           "MESSAGEBUS": bus_config})
     chat_connector.run(run_sync=False)
     return chat_connector

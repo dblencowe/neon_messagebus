@@ -67,6 +67,7 @@ def main():
     except ImportError:
         LOG.debug("MQ Connector module not available")
     except Exception as e:
+        LOG.error("Connector not started")
         LOG.exception(e)
 
     wait_for_exit_signal()

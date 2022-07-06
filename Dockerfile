@@ -6,7 +6,6 @@ LABEL vendor=neon.ai \
 ENV NEON_CONFIG_PATH /config
 
 EXPOSE 8181
-EXPOSE 8080
 
 RUN apt-get update && \
     apt-get install -y \
@@ -20,5 +19,7 @@ WORKDIR /neon_messagebus
 
 RUN pip install wheel \
     && pip install .
+
+COPY docker_overlay/ /
 
 CMD ["neon_messagebus_service"]

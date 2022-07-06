@@ -34,6 +34,7 @@ from os.path import join, dirname, abspath
 from time import time, sleep
 from threading import Event, Thread
 
+import mock
 from mycroft_bus_client import MessageBusClient, Message
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -218,6 +219,7 @@ class TestSignalUtils(unittest.TestCase):
         def create_testing_signal():
             sleep(3)
             create_signal("test_signal")
+
         check_for_signal("test_signal")
         self.assertFalse(wait_for_signal_create("test_signal", 1))
         Thread(target=create_testing_signal).start()
@@ -230,6 +232,7 @@ class TestSignalUtils(unittest.TestCase):
         def _clear_signal():
             sleep(3)
             self.assertTrue(check_for_signal("test_signal"))
+
         check_for_signal("test_signal")
         self.assertFalse(wait_for_signal_clear("test_signal", 1))
         self.assertTrue(create_signal("test_signal"))
@@ -271,7 +274,7 @@ class TestSignalUtils(unittest.TestCase):
 
 class TestConfig(unittest.TestCase):
     def test_load_messagebus_config_default(self):
-        from neon_messagebus.util.config import load_message_bus_config,\
+        from neon_messagebus.util.config import load_message_bus_config, \
             _DEFAULT_WS_CONFIG
         empty_config = {"host": None,
                         "port": None,
@@ -280,7 +283,16 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(load_message_bus_config(**empty_config),
                          load_message_bus_config(**_DEFAULT_WS_CONFIG))
 
-    def test_load_messagebus_config_configured(self):
+    @mock.patch("ovos_config.config.Configuration.load_all_configs")
+    def test_load_messagebus_config_configured(self, mock_load):
+        mock_load.return_value = {
+            "websocket": {
+                "host": "test_hostname",
+                "port": 80,
+                "route": "/test",
+                "ssl": True
+            }
+        }
         from neon_messagebus.util.config import load_message_bus_config, \
             MessageBusConfig
         test_config_dir = os.path.join(os.path.dirname(__file__),
