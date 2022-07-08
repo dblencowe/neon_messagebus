@@ -1,5 +1,5 @@
 mycroft-messagebus-client~=0.9,>0.9.3
-neon-utils[network]>=1.0.0a11,<2.0.0
+neon-utils[network]>=1.0.0a14,<2.0.0
 neon-messagebus-mq-connector~=0.2,>=0.2.1a0
 ovos-core~=0.0.3,>=0.0.4a34
 ovos_utils~=0.0,>=0.0.23a6
