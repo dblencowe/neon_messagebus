@@ -27,7 +27,7 @@
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from collections import namedtuple
-from neon_utils.logger import LOG
+from ovos_utils.log import LOG
 
 from ovos_config.config import Configuration
 

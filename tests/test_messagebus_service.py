@@ -32,7 +32,7 @@ import unittest
 
 from time import time, sleep
 from mycroft_bus_client import MessageBusClient, Message
-from neon_utils.logger import LOG
+from ovos_utils.log import LOG
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from neon_messagebus.service import NeonBusService

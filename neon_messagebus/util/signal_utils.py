@@ -30,7 +30,7 @@ from threading import Event
 from time import time
 from typing import Optional, Dict
 from mycroft_bus_client import MessageBusClient, Message
-from neon_utils.logger import LOG
+from ovos_utils.log import LOG
 from ovos_config.config import Configuration
 from ovos_utils.signal import create_signal, check_for_signal
 

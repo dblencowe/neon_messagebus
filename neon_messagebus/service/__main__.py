@@ -26,8 +26,9 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from neon_utils.logger import LOG
+from ovos_utils.log import LOG
 from neon_utils.configuration_utils import init_config_dir
+from neon_utils.log_utils import init_log
 from mycroft_bus_client.client import MessageBusClient
 
 from neon_messagebus.service import NeonBusService
@@ -42,6 +43,7 @@ from mycroft.util import wait_for_exit_signal, reset_sigint_handler
 
 def main():
     init_config_dir()
+    init_log(log_name="bus")
     reset_sigint_handler()
     # Create PID file, prevent multiple instances of this service
     lock = Lock("bus")
