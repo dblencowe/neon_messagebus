@@ -31,6 +31,8 @@ import sys
 import unittest
 
 from time import time, sleep
+
+from mock.mock import Mock
 from mycroft_bus_client import MessageBusClient, Message
 from ovos_utils.log import LOG
 
@@ -49,8 +51,22 @@ class TestMessagebusService(unittest.TestCase):
             self.assertEqual(message, callback_message)
 
         clients = list()
-        service = NeonBusService(debug=True, daemonic=True)
+        alive = Mock()
+        started = Mock()
+        ready = Mock()
+        stopping = Mock()
+        service = NeonBusService(alive_hook=alive, started_hook=started,
+                                 ready_hook=ready, stopping_hook=stopping,
+                                 debug=True, daemonic=True)
+        alive.assert_called_once()
+        started.assert_not_called()
+        ready.assert_not_called()
+        stopping.assert_not_called()
         service.start()
+        alive.assert_called_once()
+        started.assert_called_once()
+        ready.assert_not_called()
+        stopping.assert_not_called()
         LOG.info("Waiting for service start")
         self.assertTrue(service.started.wait(15))
         LOG.info("Service started")
@@ -75,6 +91,7 @@ class TestMessagebusService(unittest.TestCase):
         self.assertTrue(service.started.is_set())
         self.assertTrue(service.is_alive())
         service.shutdown()
+        stopping.assert_called_once()
         service.join()
         self.assertFalse(service.is_alive())
 

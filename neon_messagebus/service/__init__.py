@@ -42,14 +42,43 @@ from neon_messagebus.util.config import load_message_bus_config
 from mycroft.messagebus.service.event_handler import MessageBusEventHandler
 
 
+def on_ready():
+    LOG.info('Messagebus is ready.')
+
+
+def on_stopping():
+    LOG.info('Messagebus service is shutting down...')
+
+
+def on_error(e='Unknown'):
+    LOG.error('Messagebus service failed to launch ({}).'.format(repr(e)))
+
+
+def on_alive():
+    LOG.debug("Messagebus client alive")
+
+
+def on_started():
+    LOG.debug("Messagebus client started")
+
+
 class NeonBusService(Thread):
-    def __init__(self, config=None, debug=False, daemonic=False):
+    def __init__(self, ready_hook=on_ready, error_hook=on_error,
+                 stopping_hook=on_stopping, alive_hook=on_alive,
+                 started_hook=on_started,
+                 config=None, debug=False, daemonic=False):
+        alive_hook()
         self._started = Event()
         super().__init__()
         self.config = config or load_message_bus_config()
         self.debug = debug
         self.setDaemon(daemonic)
         self._stopping = Event()
+
+        self._started_hook = started_hook
+        self._ready_hook = ready_hook
+        self._stopping_hook = stopping_hook
+        self._error_hook = error_hook
 
         self._app = None
         self._loop = None
@@ -59,6 +88,7 @@ class NeonBusService(Thread):
         return self._started
 
     def run(self):
+        self._started_hook()
         self._stopping.clear()
 
         LOG.info('Starting message bus service...')
@@ -102,6 +132,7 @@ class NeonBusService(Thread):
 
     def shutdown(self):
         LOG.info("Messagebus Server shutting down.")
+        self._stopping_hook()
         self._app.stop()
         loop = ioloop.IOLoop.instance()
         loop.add_callback(loop.stop)
