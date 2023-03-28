@@ -16,5 +16,5 @@ jobs:
       version_file: "version.py"
   build_and_publish_docker:
     needs: build_and_publish_pypi
-    uses: mikejgray/.github/.github/workflows/publish_docker.yml@patch-2
+    uses: neongeckocom/.github/.github/workflows/publish_docker.yml@TEST_ArmBuilds
     secrets: inherit
