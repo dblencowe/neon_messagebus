@@ -35,7 +35,7 @@ from time import time, sleep
 from threading import Event, Thread
 
 import mock
-from mycroft_bus_client import MessageBusClient, Message
+from ovos_bus_client import MessageBusClient, Message
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from neon_messagebus.service import NeonBusService
@@ -65,7 +65,8 @@ class TestMessageUtils(unittest.TestCase):
         self.assertFalse(bus.started_running)
 
     def test_send_message(self):
-        from neon_messagebus.util.message_utils import get_messagebus, send_message
+        from neon_messagebus.util.message_utils import get_messagebus, \
+            send_message
         received: Message = None
         received_event = Event()
         received_event.clear()
@@ -78,7 +79,8 @@ class TestMessageUtils(unittest.TestCase):
         client_bus = get_messagebus()
         client_bus.on("unit_test_message", message_handler)
 
-        test_msg = Message("unit_test_message", {"time": time()}, {"test": "send Message Object"})
+        test_msg = Message("unit_test_message", {"time": time()},
+                           {"test": "send Message Object"})
         send_message(test_msg)
         received_event.wait()
         self.assertEqual(test_msg.serialize(), received.serialize())
@@ -98,7 +100,8 @@ class TestMessageUtils(unittest.TestCase):
         client_bus.close()
 
     def test_send_binary_data_message(self):
-        from neon_messagebus.util.message_utils import get_messagebus, send_binary_data_message, decode_binary_message
+        from neon_messagebus.util.message_utils import get_messagebus, \
+            send_binary_data_message, decode_binary_message
         received: Message = None
         received_event = Event()
         received_event.clear()
@@ -111,19 +114,22 @@ class TestMessageUtils(unittest.TestCase):
         client_bus = get_messagebus()
         client_bus.on("unit_test_message", message_handler)
 
-        test_file = join(dirname(abspath(__file__)), "test_objects", "test_image.png")
+        test_file = join(dirname(abspath(__file__)), "test_objects",
+                         "test_image.png")
         with open(test_file, 'rb') as f:
             byte_data = f.read()
 
         context = {"test": "send Message Object"}
-        send_binary_data_message(byte_data, "unit_test_message", msg_context=context)
+        send_binary_data_message(byte_data, "unit_test_message",
+                                 msg_context=context)
         received_event.wait()
-        self.assertEqual(received.context, context)
+        self.assertEqual(received.context['test'], context['test'])
         self.assertEqual(received.data["binary"], byte_data.hex())
         self.assertEqual(decode_binary_message(received), byte_data)
 
     def test_send_binary_file_message(self):
-        from neon_messagebus.util.message_utils import get_messagebus, send_binary_file_message, decode_binary_message
+        from neon_messagebus.util.message_utils import get_messagebus, \
+            send_binary_file_message, decode_binary_message
         received: Message = None
         received_event = Event()
         received_event.clear()
@@ -136,14 +142,16 @@ class TestMessageUtils(unittest.TestCase):
         client_bus = get_messagebus()
         client_bus.on("unit_test_message", message_handler)
 
-        test_file = join(dirname(abspath(__file__)), "test_objects", "test_image.png")
+        test_file = join(dirname(abspath(__file__)), "test_objects",
+                         "test_image.png")
         with open(test_file, 'rb') as f:
             byte_data = f.read()
 
         context = {"test": "send Message Object"}
-        send_binary_file_message(test_file, "unit_test_message", msg_context=context)
+        send_binary_file_message(test_file, "unit_test_message",
+                                 msg_context=context)
         received_event.wait()
-        self.assertEqual(received.context, context)
+        self.assertEqual(received.context['test'], context['test'])
         self.assertEqual(received.data["binary"], byte_data.hex())
         self.assertEqual(decode_binary_message(received), byte_data)
 
@@ -157,11 +165,13 @@ class TestMessageUtils(unittest.TestCase):
 
     def test_decode_binary_message(self):
         from neon_messagebus.util.message_utils import decode_binary_message
-        test_file = join(dirname(abspath(__file__)), "test_objects", "test_image.png")
+        test_file = join(dirname(abspath(__file__)), "test_objects",
+                         "test_image.png")
         with open(test_file, 'rb') as f:
             byte_data = f.read()
         hex_data = byte_data.hex()
-        message = Message("tester", {"binary": hex_data}, {"context": "unit test"})
+        message = Message("tester", {"binary": hex_data},
+                          {"context": "unit test"})
         serialized_message = message.serialize()
 
         self.assertEqual(decode_binary_message(hex_data), byte_data)
@@ -185,9 +195,11 @@ class TestSignalUtils(unittest.TestCase):
     def test_00_init_signal_handlers(self):
         from neon_utils.signal_utils import init_signal_handlers
         init_signal_handlers()
-        from neon_utils.signal_utils import _manager_create_signal, _create_signal
+        from neon_utils.signal_utils import _manager_create_signal, \
+            _create_signal
         self.assertEqual(_manager_create_signal, _create_signal)
-        from neon_utils.signal_utils import _manager_check_for_signal, _check_for_signal
+        from neon_utils.signal_utils import _manager_check_for_signal, \
+            _check_for_signal
         self.assertEqual(_manager_check_for_signal, _check_for_signal)
 
     def test_create_signal(self):
@@ -195,7 +207,8 @@ class TestSignalUtils(unittest.TestCase):
         from neon_utils.signal_utils import create_signal
         self.assertTrue(create_signal("test_signal"))
         self.assertTrue(create_signal("test_signal"))
-        self.assertIsInstance(self.signal_manager._signals["test_signal"], Signal)
+        self.assertIsInstance(self.signal_manager._signals["test_signal"],
+                              Signal)
         self.assertTrue(self.signal_manager._signals["test_signal"].is_set)
 
     def test_check_for_signal(self):
@@ -214,7 +227,8 @@ class TestSignalUtils(unittest.TestCase):
         self.assertFalse(check_for_signal("test_signal"))
 
     def test_wait_for_signal_create(self):
-        from neon_utils.signal_utils import check_for_signal, create_signal, wait_for_signal_create
+        from neon_utils.signal_utils import check_for_signal, create_signal, \
+            wait_for_signal_create
 
         def create_testing_signal():
             sleep(3)
@@ -227,7 +241,8 @@ class TestSignalUtils(unittest.TestCase):
         self.assertTrue(check_for_signal("test_signal"))
 
     def test_wait_for_signal_clear(self):
-        from neon_utils.signal_utils import check_for_signal, create_signal, wait_for_signal_clear
+        from neon_utils.signal_utils import check_for_signal, create_signal, \
+            wait_for_signal_clear
 
         def _clear_signal():
             sleep(3)

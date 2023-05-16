@@ -26,15 +26,10 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from collections import namedtuple
 from ovos_utils.log import LOG
-
+from ovos_bus_client.conf import MessageBusConfig
 from ovos_config.config import Configuration
 
-MessageBusConfig = namedtuple(
-    'MessageBusConfig',
-    ['host', 'port', 'route', 'ssl']
-)
 
 _DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
                       "port": 8181,

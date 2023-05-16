@@ -31,11 +31,11 @@ from os.path import expanduser, isfile
 from threading import Event
 from typing import Union, Optional
 
-from mycroft_bus_client import MessageBusClient, Message
+from ovos_bus_client import MessageBusClient, Message
+from ovos_utils import create_daemon
+from ovos_utils.json_helper import merge_dict
 
-from mycroft.util import create_daemon
-from mycroft.messagebus.load_config import load_message_bus_config
-from mycroft.util.json_helper import merge_dict
+from neon_messagebus.util.config import load_message_bus_config
 
 
 def get_messagebus(running: bool = True) -> MessageBusClient:

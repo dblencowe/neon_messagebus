@@ -26,19 +26,16 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from ovos_utils import wait_for_exit_signal
 from ovos_utils.log import LOG
+from ovos_utils.process_utils import reset_sigint_handler, PIDLock as Lock
 from neon_utils.configuration_utils import init_config_dir
 from neon_utils.log_utils import init_log
-from mycroft_bus_client.client import MessageBusClient
-
+from ovos_bus_client.client import MessageBusClient
 from neon_messagebus.service import NeonBusService
 from neon_messagebus.util.signal_utils import SignalManager
 from neon_messagebus.util.mq_connector import start_mq_connector
 from neon_messagebus.util.config import load_message_bus_config
-
-
-from mycroft.lock import Lock  # creates/supports PID locking file
-from mycroft.util import wait_for_exit_signal, reset_sigint_handler
 
 
 def main(**kwargs):

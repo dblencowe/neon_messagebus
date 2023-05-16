@@ -33,7 +33,7 @@ import unittest
 from time import time, sleep
 
 from mock.mock import Mock
-from mycroft_bus_client import MessageBusClient, Message
+from ovos_bus_client import MessageBusClient, Message
 from ovos_utils.log import LOG
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
