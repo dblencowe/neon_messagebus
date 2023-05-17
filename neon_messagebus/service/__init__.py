@@ -69,7 +69,7 @@ class NeonBusService(Thread):
         super().__init__()
         self.config = config or load_message_bus_config()
         self.debug = debug
-        self.setDaemon(daemonic)
+        self.daemon = daemonic
         self._stopping = Event()
 
         self._started_hook = started_hook

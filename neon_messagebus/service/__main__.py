@@ -31,6 +31,7 @@ from ovos_utils.log import LOG
 from ovos_utils.process_utils import reset_sigint_handler, PIDLock as Lock
 from neon_utils.configuration_utils import init_config_dir
 from neon_utils.log_utils import init_log
+from neon_utils.process_utils import start_malloc, snapshot_malloc, print_malloc
 from ovos_bus_client.client import MessageBusClient
 from neon_messagebus.service import NeonBusService
 from neon_messagebus.util.signal_utils import SignalManager
@@ -44,8 +45,11 @@ def main(**kwargs):
     reset_sigint_handler()
     # Create PID file, prevent multiple instances of this service
     lock = Lock("bus")
-    # TODO debug should be False by default
-    service = NeonBusService(debug=True, daemonic=True, **kwargs)
+    from ovos_config.config import Configuration
+    config = Configuration()
+    debug = Configuration().get('debug', False)
+    malloc_running = start_malloc(config, stack_depth=4)
+    service = NeonBusService(debug=debug, daemonic=True, **kwargs)
     service.start()
     messagebus_config = load_message_bus_config()
     config_dict = messagebus_config._asdict()
@@ -71,6 +75,11 @@ def main(**kwargs):
 
     service._ready_hook()
     wait_for_exit_signal()
+    if malloc_running:
+        try:
+            print_malloc(snapshot_malloc())
+        except Exception as e:
+            LOG.error(e)
     service.shutdown()
 
     if connector:
