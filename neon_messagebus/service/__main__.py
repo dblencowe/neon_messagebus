@@ -29,10 +29,10 @@
 from ovos_utils import wait_for_exit_signal
 from ovos_utils.log import LOG
 from ovos_utils.process_utils import reset_sigint_handler, PIDLock as Lock
-from neon_utils.configuration_utils import init_config_dir
 from neon_utils.log_utils import init_log
 from neon_utils.process_utils import start_malloc, snapshot_malloc, print_malloc
 from ovos_bus_client.client import MessageBusClient
+from ovos_config.config import Configuration
 from neon_messagebus.service import NeonBusService
 from neon_messagebus.util.signal_utils import SignalManager
 from neon_messagebus.util.mq_connector import start_mq_connector
@@ -40,12 +40,10 @@ from neon_messagebus.util.config import load_message_bus_config
 
 
 def main(**kwargs):
-    init_config_dir()
     init_log(log_name="bus")
     reset_sigint_handler()
     # Create PID file, prevent multiple instances of this service
     lock = Lock("bus")
-    from ovos_config.config import Configuration
     config = Configuration()
     debug = Configuration().get('debug', False)
     malloc_running = start_malloc(config, stack_depth=4)
