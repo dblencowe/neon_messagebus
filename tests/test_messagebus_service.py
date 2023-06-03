@@ -31,8 +31,8 @@ import sys
 import unittest
 
 from time import time, sleep
-
-from mock.mock import Mock
+from unittest.mock import Mock, patch
+from click.testing import CliRunner
 from ovos_bus_client import MessageBusClient, Message
 from ovos_utils.log import LOG
 
@@ -104,6 +104,18 @@ class TestMessagebusService(unittest.TestCase):
         service.shutdown()
         self.assertFalse(service.is_alive())
         service.join()
+
+
+class TestCLI(unittest.TestCase):
+    runner = CliRunner()
+
+    @patch("neon_messagebus.cli.init_config_dir")
+    @patch("neon_messagebus.service.__main__.main")
+    def test_run(self, main, init_config):
+        from neon_messagebus.cli import run
+        self.runner.invoke(run)
+        init_config.assert_called_once()
+        main.assert_called_once()
 
 
 if __name__ == '__main__':
