@@ -3,12 +3,13 @@ FROM python:3.8-slim
 LABEL vendor=neon.ai \
     ai.neon.name="neon-messagebus"
 
-ENV NEON_CONFIG_PATH /config
+ENV OVOS_CONFIG_BASE_FOLDER neon
+ENV OVOS_CONFIG_FILENAME neon.yaml
 
 EXPOSE 8181
 
-RUN apt-get update && \
-    apt-get install -y \
+RUN apt update && \
+    apt install -y \
     gcc \
     python3-dev \
     swig \
@@ -22,4 +23,4 @@ RUN pip install wheel \
 
 COPY docker_overlay/ /
 
-CMD ["neon_messagebus_service"]
+CMD ["neon-messagebus", "run"]

@@ -34,9 +34,9 @@ def start_mq_connector(bus_config: dict):
     """
     Start the MQ Connector module to handle MQ API requests
     """
-    from neon_messagebus_mq_connector import ChatAPIProxy
+    from neon_messagebus_mq_connector.controller import ChatAPIProxy
     config = Configuration()
-    mq_config = dict(config).get("MQ")
+    mq_config = config.get("MQ", {})
     bus_config = bus_config or dict(config).get("websocket")
 
     if "neon_chat_api" not in mq_config.get("users", {}):

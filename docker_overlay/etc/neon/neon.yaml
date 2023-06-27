@@ -1,10 +1,3 @@
-MQ:
-  server: mq.2021.us
-  port: 5672
-  users:
-    mq_handler:
-      user: neon_api_utils
-      password: Klatchat2021
 signal:
   use_signal_files: false
   max_wait_seconds: 300

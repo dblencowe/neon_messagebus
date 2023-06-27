@@ -52,21 +52,21 @@ def main(**kwargs):
     messagebus_config = load_message_bus_config()
     config_dict = messagebus_config._asdict()
     config_dict['host'] = "0.0.0.0"
-    client = MessageBusClient(**config_dict)
     if not service.started.wait(10):
         LOG.warning("Timeout waiting for service start")
+    client = MessageBusClient(**config_dict)
     SignalManager(client)
-    LOG.debug("Signal Manager Initialized")
+    LOG.info("Signal Manager Initialized")
 
     connector = None
     try:
         connector = start_mq_connector(config_dict)
         if connector:
-            LOG.debug("MQ Connection Established")
+            LOG.info("MQ Connection Established")
         else:
-            LOG.debug("No MQ Credentials provided")
-    except ImportError:
-        LOG.debug("MQ Connector module not available")
+            LOG.info("No MQ Credentials provided")
+    except ImportError as e:
+        LOG.warning(f"MQ Connector module not available: {e}")
     except Exception as e:
         LOG.error("Connector not started")
         LOG.exception(e)
