@@ -76,7 +76,7 @@ setup(
     entry_points={
         'console_scripts': [
             # TODO: Deprecate `neon_messagebus_service` entrypoint
-            'neon_messagebus_service=neon_messagebus.service.__main__:main',
+            'neon_messagebus_service=neon_messagebus.service.__main__:deprecated_entrypoint',
             'neon-messagebus=neon_messagebus.cli:neon_messagebus_cli'
         ]
     }

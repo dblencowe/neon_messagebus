@@ -90,5 +90,12 @@ def main(**kwargs):
     LOG.info("Messagebus service stopped")
 
 
+def deprecated_entrypoint():
+    from ovos_utils.log import log_deprecation
+    log_deprecation("Use `neon-messagebus run` in place of "
+                    "`neon_messagebus_service`", "2.0.0")
+    main()
+
+
 if __name__ == "__main__":
     main()
