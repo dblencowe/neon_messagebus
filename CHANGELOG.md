@@ -1,20 +1,20 @@
 # Changelog
 
-## [1.0.1a2](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.0.1a2) (2023-06-05)
+## [1.0.2a2](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.0.2a2) (2023-07-18)
 
-[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.0.1a1...1.0.1a2)
-
-**Merged pull requests:**
-
-- Stable dependencies [\#55](https://github.com/NeonGeckoCom/neon_messagebus/pull/55) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [1.0.1a1](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.0.1a1) (2023-06-03)
-
-[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.0.0...1.0.1a1)
+[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.0.2a1...1.0.2a2)
 
 **Merged pull requests:**
 
-- Add CLI module tests [\#54](https://github.com/NeonGeckoCom/neon_messagebus/pull/54) ([NeonDaniel](https://github.com/NeonDaniel))
+- Update dependencies and mark deprecation [\#58](https://github.com/NeonGeckoCom/neon_messagebus/pull/58) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [1.0.2a1](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.0.2a1) (2023-06-27)
+
+[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.0.1...1.0.2a1)
+
+**Merged pull requests:**
+
+- Update Docker to use OVOS\_CONFIG envvars [\#57](https://github.com/NeonGeckoCom/neon_messagebus/pull/57) ([NeonDaniel](https://github.com/NeonDaniel))
 
 
 
