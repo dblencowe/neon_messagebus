@@ -42,9 +42,7 @@ def start_mq_connector(bus_config: dict):
     if "neon_chat_api" not in mq_config.get("users", {}):
         LOG.info("Skipping MQ Connector init")
         return None
-    bus_config = bus_config
     chat_connector = ChatAPIProxy(service_name="neon_chat_api",
-                                  config={"MQ": mq_config,
-                                          "MESSAGEBUS": bus_config})
+                                  config=config)
     chat_connector.run(run_sync=False)
     return chat_connector
