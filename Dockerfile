@@ -20,7 +20,7 @@ ADD . /neon_messagebus
 WORKDIR /neon_messagebus
 
 RUN pip install wheel \
-    && pip install .
+    && pip install .[docker]
 
 COPY docker_overlay/ /
 
