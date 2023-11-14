@@ -31,12 +31,8 @@ from ovos_utils.log import LOG
 from ovos_utils.process_utils import reset_sigint_handler, PIDLock as Lock
 from neon_utils.log_utils import init_log
 from neon_utils.process_utils import start_malloc, snapshot_malloc, print_malloc
-from ovos_bus_client.client import MessageBusClient
 from ovos_config.config import Configuration
 from neon_messagebus.service import NeonBusService
-from neon_messagebus.util.signal_utils import SignalManager
-from neon_messagebus.util.mq_connector import start_mq_connector
-from neon_messagebus.util.config import load_message_bus_config
 
 
 def main(**kwargs):
@@ -47,32 +43,14 @@ def main(**kwargs):
     config = Configuration()
     debug = Configuration().get('debug', False)
     malloc_running = start_malloc(config, stack_depth=4)
-    service = NeonBusService(debug=debug, daemonic=True, **kwargs)
+    kwargs.setdefault("debug", debug)
+    kwargs.setdefault("config", config)
+
+    service = NeonBusService(daemonic=True, **kwargs)
     service.start()
-    messagebus_config = load_message_bus_config()
-    config_dict = messagebus_config._asdict()
-    config_dict['host'] = "0.0.0.0"
-    if not service.started.wait(10):
-        LOG.warning("Timeout waiting for service start")
-    client = MessageBusClient(**config_dict)
-    SignalManager(client)
-    LOG.info("Signal Manager Initialized")
-
-    connector = None
-    try:
-        connector = start_mq_connector(config_dict)
-        if connector:
-            LOG.info("MQ Connection Established")
-        else:
-            LOG.info("No MQ Credentials provided")
-    except ImportError as e:
-        LOG.warning(f"MQ Connector module not available: {e}")
-    except Exception as e:
-        LOG.error("Connector not started")
-        LOG.exception(e)
-
-    service._ready_hook()
+    LOG.debug("Waiting for exit signal")
     wait_for_exit_signal()
+
     if malloc_running:
         try:
             print_malloc(snapshot_malloc())
@@ -80,14 +58,7 @@ def main(**kwargs):
             LOG.error(e)
     service.shutdown()
 
-    if connector:
-        from pika.exceptions import StreamLostError
-        try:
-            connector.stop()
-        except StreamLostError:
-            pass
     lock.delete()
-    LOG.info("Messagebus service stopped")
 
 
 def deprecated_entrypoint():

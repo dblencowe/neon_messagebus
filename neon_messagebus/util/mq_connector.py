@@ -30,16 +30,15 @@ from ovos_config.config import Configuration
 from ovos_utils.log import LOG
 
 
-def start_mq_connector(bus_config: dict):
+def start_mq_connector(config: dict):
     """
     Start the MQ Connector module to handle MQ API requests
+    @param config: Configuration object
     """
     from neon_messagebus_mq_connector.controller import ChatAPIProxy
-    config = Configuration()
-    mq_config = config.get("MQ", {})
-    bus_config = bus_config or dict(config).get("websocket")
+    config = config or Configuration()
 
-    if "neon_chat_api" not in mq_config.get("users", {}):
+    if "neon_chat_api" not in config.get("MQ", {}).get("users", {}):
         LOG.info("Skipping MQ Connector init")
         return None
     chat_connector = ChatAPIProxy(service_name="neon_chat_api",

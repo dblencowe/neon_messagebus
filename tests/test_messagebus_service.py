@@ -63,13 +63,13 @@ class TestMessagebusService(unittest.TestCase):
         ready.assert_not_called()
         stopping.assert_not_called()
         service.start()
-        alive.assert_called_once()
-        started.assert_called_once()
-        ready.assert_not_called()
-        stopping.assert_not_called()
         LOG.info("Waiting for service start")
         self.assertTrue(service.started.wait(15))
-        LOG.info("Service started")
+        alive.assert_called_once()
+        started.assert_called_once()
+        ready.assert_called_once()
+        stopping.assert_not_called()
+
         for i in range(32):
             client = MessageBusClient()
             client.run_in_thread()
