@@ -40,6 +40,9 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from neon_messagebus.service import NeonBusService
 
 
+_mock_langs = Mock(stt={"stt1", "stt2"}, tts={"tts1", "tts2", "tts3"},
+                   skills={"skills1"})
+
 class TestMessagebusService(unittest.TestCase):
     def test_bus_service(self):
         called_count = 0
@@ -55,13 +58,16 @@ class TestMessagebusService(unittest.TestCase):
         started = Mock()
         ready = Mock()
         stopping = Mock()
+
         service = NeonBusService(alive_hook=alive, started_hook=started,
                                  ready_hook=ready, stopping_hook=stopping,
                                  debug=True, daemonic=True)
+        # Test init
         alive.assert_called_once()
         started.assert_not_called()
         ready.assert_not_called()
         stopping.assert_not_called()
+        # Test service start
         service.start()
         LOG.info("Waiting for service start")
         self.assertTrue(service.started.wait(15))
@@ -69,7 +75,7 @@ class TestMessagebusService(unittest.TestCase):
         started.assert_called_once()
         ready.assert_called_once()
         stopping.assert_not_called()
-
+        # Test client connections
         for i in range(32):
             client = MessageBusClient()
             client.run_in_thread()
@@ -87,13 +93,29 @@ class TestMessagebusService(unittest.TestCase):
             sleep(1)
 
         self.assertEqual(len(clients), called_count)
-
+        # Test shutdown
         self.assertTrue(service.started.is_set())
         self.assertTrue(service.is_alive())
         service.shutdown()
         stopping.assert_called_once()
         service.join()
         self.assertFalse(service.is_alive())
+
+    @patch("neon_utils.language_utils.get_supported_languages")
+    def test_get_languages(self, get_langs):
+        from ovos_utils.messagebus import FakeBus
+        get_langs.return_value = _mock_langs
+        bus = FakeBus()
+        service = NeonBusService()
+        service._bus = bus
+        on_langs = Mock()
+        bus.on("neon.languages.get.response", on_langs)
+        service._handle_get_languages(Message("neon.languages.get"))
+        on_langs.assert_called_once()
+        resp = on_langs.call_args[0][0]
+        self.assertEqual(resp.data, {"stt": list(_mock_langs.stt),
+                                     "tts": list(_mock_langs.tts),
+                                     "skills": list(_mock_langs.skills)})
 
     def test_service_shutdown(self):
         service = NeonBusService(daemonic=False)

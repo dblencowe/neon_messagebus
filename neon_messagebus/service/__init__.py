@@ -34,7 +34,7 @@ from time import sleep
 from os.path import expanduser, isfile
 from threading import Thread, Event
 
-from ovos_bus_client import MessageBusClient
+from ovos_bus_client import MessageBusClient, Message
 from ovos_utils.process_utils import StatusCallbackMap, ProcessStatus
 from tornado import web, ioloop
 from ovos_utils.log import LOG
@@ -87,6 +87,7 @@ class NeonBusService(Thread):
         self._stopping = Event()
         self._running = Event()
 
+        self._bus = None
         self._app = None
         self._loop = None
         self._loop_thread = None
@@ -107,6 +108,7 @@ class NeonBusService(Thread):
         self._loop_thread = Thread(target=ioloop.IOLoop.instance().start)
         self._loop_thread.start()
 
+        self._bus = self._init_bus_client()
         self._init_signal_manager()
         self._init_mq_connector()
 
@@ -115,12 +117,30 @@ class NeonBusService(Thread):
         LOG.info('Message bus service started!')
         self._stopping.wait()
 
-    def _init_signal_manager(self):
+    def _init_bus_client(self) -> MessageBusClient:
         config_dict = {k: v for k, v in self.config.get("websocket", {}).items()
                        if k in ("host", "port", "route", "ssl")}
         config_dict['host'] = "0.0.0.0"
-        client = MessageBusClient(**config_dict)
-        self._signal_manager = SignalManager(client)
+        bus = MessageBusClient(**config_dict)
+        bus.run_in_thread()
+        bus.on('neon.languages.get', self._handle_get_languages)
+
+        return bus
+
+    def _handle_get_languages(self, message: Message):
+        """
+        Handle a request to get languages supported by Neon Core.
+        @param message: neon.languages.get Message
+        """
+        from neon_utils.language_utils import get_supported_languages
+        supported_langs = get_supported_languages()
+        self._bus.emit(message.response({"stt": list(supported_langs.stt),
+                                         "tts": list(supported_langs.tts),
+                                         "skills": list(supported_langs.skills)
+                                         }))
+
+    def _init_signal_manager(self):
+        self._signal_manager = SignalManager(self._bus)
         LOG.info("Signal Manager started")
 
     def _init_mq_connector(self):
