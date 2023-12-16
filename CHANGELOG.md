@@ -1,20 +1,80 @@
 # Changelog
 
-## [1.0.2a2](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.0.2a2) (2023-07-18)
+## [1.1.1a9](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.1.1a9) (2023-12-14)
 
-[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.0.2a1...1.0.2a2)
-
-**Merged pull requests:**
-
-- Update dependencies and mark deprecation [\#58](https://github.com/NeonGeckoCom/neon_messagebus/pull/58) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [1.0.2a1](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.0.2a1) (2023-06-27)
-
-[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.0.1...1.0.2a1)
+[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.1.1a8...1.1.1a9)
 
 **Merged pull requests:**
 
-- Update Docker to use OVOS\_CONFIG envvars [\#57](https://github.com/NeonGeckoCom/neon_messagebus/pull/57) ([NeonDaniel](https://github.com/NeonDaniel))
+- Update dependencies to prep release [\#68](https://github.com/NeonGeckoCom/neon_messagebus/pull/68) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [1.1.1a8](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.1.1a8) (2023-11-28)
+
+[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.1.1a7...1.1.1a8)
+
+**Merged pull requests:**
+
+- Add language support handler and Update dependencies [\#67](https://github.com/NeonGeckoCom/neon_messagebus/pull/67) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [1.1.1a7](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.1.1a7) (2023-11-18)
+
+[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.1.1a6...1.1.1a7)
+
+**Merged pull requests:**
+
+- Update MQ Connector with routing fix [\#66](https://github.com/NeonGeckoCom/neon_messagebus/pull/66) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [1.1.1a6](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.1.1a6) (2023-11-15)
+
+[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.1.1a5...1.1.1a6)
+
+**Merged pull requests:**
+
+- Update neon-messagebus-mq-connector to support response event routing [\#65](https://github.com/NeonGeckoCom/neon_messagebus/pull/65) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [1.1.1a5](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.1.1a5) (2023-11-14)
+
+[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.1.1a4...1.1.1a5)
+
+**Implemented enhancements:**
+
+- Refactor services into `NeonBusService` [\#32](https://github.com/NeonGeckoCom/neon_messagebus/issues/32)
+
+**Merged pull requests:**
+
+- Refactor Service and Update Dependencies [\#63](https://github.com/NeonGeckoCom/neon_messagebus/pull/63) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [1.1.1a4](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.1.1a4) (2023-11-14)
+
+[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.1.1a3...1.1.1a4)
+
+**Merged pull requests:**
+
+- Update dependencies and add Docker extras [\#64](https://github.com/NeonGeckoCom/neon_messagebus/pull/64) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [1.1.1a3](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.1.1a3) (2023-07-27)
+
+[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.1.1a2...1.1.1a3)
+
+**Merged pull requests:**
+
+- Update MQ dependencies for K8s compat [\#62](https://github.com/NeonGeckoCom/neon_messagebus/pull/62) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [1.1.1a2](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.1.1a2) (2023-07-25)
+
+[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.1.1a1...1.1.1a2)
+
+**Merged pull requests:**
+
+- Update configuration handling for Kubernetes compat [\#61](https://github.com/NeonGeckoCom/neon_messagebus/pull/61) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [1.1.1a1](https://github.com/NeonGeckoCom/neon_messagebus/tree/1.1.1a1) (2023-07-25)
+
+[Full Changelog](https://github.com/NeonGeckoCom/neon_messagebus/compare/1.1.0...1.1.1a1)
+
+**Merged pull requests:**
+
+- Update Docker default config path [\#60](https://github.com/NeonGeckoCom/neon_messagebus/pull/60) ([NeonDaniel](https://github.com/NeonDaniel))
 
 
 
