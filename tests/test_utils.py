@@ -286,7 +286,9 @@ class TestSignalUtils(unittest.TestCase):
 
 
 class TestConfig(unittest.TestCase):
-    def test_load_messagebus_config_default(self):
+    @mock.patch("ovos_config.config.Configuration.load_all_configs")
+    def test_load_messagebus_config_default(self, load_config):
+        load_config.return_value = {}
         from neon_messagebus.util.config import load_message_bus_config, \
             _DEFAULT_WS_CONFIG
         empty_config = {"host": None,
