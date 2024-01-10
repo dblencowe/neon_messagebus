@@ -1,6 +1,6 @@
 neon-messagebus-mq-connector~=0.4
 neon-mq-connector~=0.7,>=0.7.1
-ovos-messagebus~=0.0.3,>=0.0.4a8
+ovos-messagebus~=0.0.4
 ovos_utils~=0.0.32
 ovos-config~=0.0.10
 ovos-bus-client~=0.0.6
