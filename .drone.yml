@@ -1,0 +1,25 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+trigger:
+  branch:
+    - develop
+  event:
+    - push
+    - custom
+
+steps:
+  - name: publish
+    image: plugins/docker
+    settings:
+      dockerfile: Dockerfile
+      context: .
+      repo: vcs.services.strawberryelk.internal:5000/neon/neon_messagebus
+      registry: vcs.services.strawberryelk.internal:5000
+      insecure: true
+      platform: linux/amd64,linux/arm64
+      tags:
+        - latest 
+        - "${DRONE_TAG:-${DRONE_COMMIT_SHA:0:8}}"
