@@ -25,44 +25,11 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-import click
-import sys
-from typing import List
-
-from click_default_group import DefaultGroup
-from neon_utils.packaging_utils import get_package_version_spec
-from neon_utils.configuration_utils import init_config_dir
+from typing import List, Union
 from ovos_config.config import Configuration
-from ovos_utils.log import LOG, log_deprecation
 
-@click.group("neon-messagebus", cls=DefaultGroup,
-             no_args_is_help=True, invoke_without_command=True,
-             help="Neon Messagebus Commands\n\n"
-                  "See also: neon COMMAND --help")
-@click.option("--version", "-v", is_flag=True, required=False,
-              help="Print the current version")
-def neon_messagebus_cli(version: bool = False):
-    if version:
-        click.echo(f"neon_messagebus version "
-                   f"{get_package_version_spec('neon_messagebus')}")
+def build_extra_dependency_list(config: Union[dict, Configuration], additional: List[str] = []) -> List[str]:
+    extra_dependencies = config.get("extra_dependencies", {})
+    dependencies = additional + extra_dependencies.get("global", []) + extra_dependencies.get("messagebus", [])
 
-@neon_messagebus_cli.command(help="Install neon-messagebus module dependencies from config & cli")
-@click.option("--package", "-p", default=[], multiple=True,
-              help="Additional package to install (can be repeated)")
-def install_dependencies(package: List[str]):
-    from neon_utils.packaging_utils import install_packages_from_pip
-    from neon_messagebus.util.package_utils import build_extra_dependency_list
-    config = Configuration()
-    dependencies = build_extra_dependency_list(config, list(package))
-    result = install_packages_from_pip("neon-messagebus", dependencies)
-    LOG.info(f"pip exit code: {result}")
-    sys.exit(result)
-
-@neon_messagebus_cli.command(help="Start Neon Messagebus module")
-def run():
-    init_config_dir()
-    from neon_messagebus.service.__main__ import main
-    click.echo("Starting Messagebus Service")
-    main()
-    click.echo("Messagebus Service Shutdown")
+    return dependencies

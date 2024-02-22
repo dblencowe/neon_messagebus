@@ -24,4 +24,6 @@ RUN pip install wheel \
 
 COPY docker_overlay/ /
 
+RUN neon-messagebus install-dependencies
+
 CMD ["neon-messagebus", "run"]
